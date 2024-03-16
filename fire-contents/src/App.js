@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import {db} from './firebaseConnection'
-import {doc, setDoc, collection, addDoc, getDoc} from 'firebase/firestore' // to register item
+import {doc, setDoc, collection, addDoc, getDoc, getDocs} from 'firebase/firestore' // to register item
 
 import './index.css'
 
@@ -8,19 +8,10 @@ function App() {
 
   const[title, setTitle] = useState('') // textarea value
   const[author, setAuthor] = useState('') // input value
+  const [posts, setPosts] = useState([])
 
   async function handleAdd(){
-    // await setDoc(doc(db, "posts", "12345"), { // access 'posts' and create '12345' doc
-    //   title: title,
-    //   author: author
-    // })
-    // .then(() => {
-    //   console.log("Data registered in the database.")
-    // })
-    // .catch((error) => {
-    //   console.log("Error" + error)
-    // })
-  
+    
     await addDoc(collection(db, "posts"), {
       title: title,
       author: author
@@ -31,21 +22,41 @@ function App() {
       setAuthor ('') // cleaning too...
     })
     .catch ((error) => {
-      console.log("Error " + error)
+      console.log("ERROR! " + error)
     })
   
   }
 
   async function searchPost(){
-    const postRef = doc(db, "posts", "12345") // search for a doc ('posts') in db
-    await getDoc(postRef) // getDoc -> promise
-    .then((snapshot) => { // snapshot -> contains the dates (representation)
-      setAuthor(snapshot.data().author) // snapshot.data() -> access
-      setTitle(snapshot.data().title)
+
+    const postsRef = collection(db, "posts")
+    await getDocs(postsRef) // docs of the 'posts'
+    .then((snapshot) => {
+      let list = []
+      snapshot.forEach((doc) => {
+        list.push({
+          id: doc.id,
+          title: doc.data().title,
+          author: doc.data().author
+        })
+      })
+
+      setPosts(list)
+
     })
-    .catch(() => {
-      console.log("ERROR!")
+    .catch((error) => {
+      console.log("ERROR! " + error)
     })
+    
+    // const postRef = doc(db, "posts", "12345") // search for a doc ('posts') in db
+    // await getDoc(postRef) // getDoc -> promise
+    // .then((snapshot) => { // snapshot -> contains the dates (representation)
+    //   setAuthor(snapshot.data().author) // snapshot.data() -> access
+    //   setTitle(snapshot.data().title)
+    // })
+    // .catch(() => {
+    //   console.log("ERROR!")
+    // })
   }
 
 
@@ -63,6 +74,17 @@ function App() {
 
         <button onClick={handleAdd}>Registrer</button>
         <button onClick={searchPost}>Search post</button>
+
+        <ul>
+          {posts.map((post) => {
+            return (
+              <li key={post.id}>
+                <span>Title: {post.title} </span> <br/>
+                <span>Author: {post.author}</span> <br/>
+              </li>
+            )
+          })}
+        </ul>
 
       </div>
     </div>
