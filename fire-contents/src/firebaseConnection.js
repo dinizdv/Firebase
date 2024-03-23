@@ -1,5 +1,6 @@
 import {initializeApp} from 'firebase/app'
 import {getFirestore} from 'firebase/firestore' // database (firestore - NoSQL)
+import {getAuth} from 'firebase/auth'
 
 // my informations
 const firebaseConfig = {
@@ -15,5 +16,6 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig) // initializing of the firebase (initializeApp get´s the object with configs)
 
 const db = getFirestore(firebaseApp)
+const auth = getAuth(firebaseApp)
 
-export {db}
+export {db, auth}
