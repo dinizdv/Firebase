@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import {db} from './firebaseConnection'
-import {doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc} from 'firebase/firestore' // to register item
+import {doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc} from 'firebase/firestore' // to register item
 
 import './index.css'
 
@@ -78,6 +78,17 @@ function App() {
     })
   }
 
+  async function deletePost(id){
+    const docRef = doc(db, "posts", id)
+    await deleteDoc(docRef)
+    .then(() => {
+      alert('Deu bom')
+    })
+    .catch((error) => {
+      console.log("ERROR! " + error)
+    })
+  }
+
 
   return (
     <div className="App">
@@ -104,6 +115,7 @@ function App() {
                 <strong>Id: {post.id}</strong><br/>
                 <span>Title: {post.title}</span> <br/>
                 <span>Author: {post.author}</span> <br/>
+                <button onClick={ () => deletePost(post.id)}>Delete</button><br/><br/>
               </li>
             )
           })}
