@@ -1,6 +1,6 @@
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import {db} from './firebaseConnection'
-import {doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc} from 'firebase/firestore' // to register item
+import {doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot} from 'firebase/firestore'
 
 import './index.css'
 
@@ -11,6 +11,24 @@ function App() {
   const [idPost, setIdPost] = useState ('')
 
   const [posts, setPosts] = useState([])
+
+  useEffect(() => {
+    async function loadPosts(){
+      // onSnapshot -> update in real time
+      const unsub = onSnapshot(collection(db, "posts"), (snapshot)=> {
+        let listPost = []
+        snapshot.forEach((doc) => {
+          listPost.push({
+            id: doc.id,
+            title: doc.data().title,
+            author: doc.data().author
+          })
+        })
+        setPosts(listPost)
+      })
+    }
+    loadPosts()
+  }, [])
 
   async function handleAdd(){
     
@@ -82,7 +100,7 @@ function App() {
     const docRef = doc(db, "posts", id)
     await deleteDoc(docRef)
     .then(() => {
-      alert('Deu bom')
+      alert('Post deleted')
     })
     .catch((error) => {
       console.log("ERROR! " + error)
