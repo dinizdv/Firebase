@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react'
 import {db, auth} from './firebaseConnection'
 import {doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot} from 'firebase/firestore'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from 'firebase/auth'
 
 import './index.css'
 
@@ -13,6 +13,8 @@ function App() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [posts, setPosts] = useState([])
+  const [user, setUser] = useState(false)
+  const [userDetail, setUserDetail] = useState('')
 
   useEffect(() => {
     async function loadPosts(){
@@ -128,6 +130,30 @@ function App() {
     })
   }
 
+  async function loginUser(){
+    await signInWithEmailAndPassword(auth, email, password)
+    .then((value) => {
+      console.log('user logged in successfully')
+      console.log(value.user)
+      setUserDetail({
+        uid: value.user.uid,
+        email: value.user.email,
+      })
+      setUser(true) // logged
+      setEmail('')
+      setPassword('')
+    })
+    .catch(() =>{
+      console.log('ERROR!')
+    })
+  }
+
+
+  async function logout(){
+    await signOut(auth)
+    setUser(false)
+    setUserDetail({}) // empty object
+  }
 
   return (
     <div className="App">
@@ -135,6 +161,16 @@ function App() {
       <div className="container">
         
       <h1>React + Firebase</h1>
+
+      {
+        user && (
+          <div>
+            <h2>You are logged in!</h2><br/>
+            <span>ID: {userDetail.uid} - EMAIL: {userDetail.email}</span><br/>
+            <button onClick={logout}>Log out</button><br/>
+          </div>
+        )
+      }
 
         <div>
           <label>Email:</label>
@@ -144,6 +180,7 @@ function App() {
           <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder='your password...'/><br/>
         
           <button onClick={newUser}>Registrer</button>
+          <button onClick={loginUser}>Login</button>
         </div>
         
 
